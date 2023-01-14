@@ -6,6 +6,7 @@ BLADES_HOME_URL = "http://stats.nchl.com/site/3333/page.asp?Site=9818&page=Teams
 
 #TODO: These have been hacked in for now - opponent name:url mapping should live in a dictionary
 #      Also, move the images to this repo
+IMAGE_BASE_URL = "https://github.com/ian-hutchinson/pixlet-resources/blob/main/"
 BOF_IMAGE_URL = "https://github.com/ian-hutchinson/pixlet-resources/blob/main/bof_100x.png?raw=true"
 BADGER_BATTALION_IMAGE_URL = "https://github.com/ian-hutchinson/pixlet-resources/blob/main/bb.png?raw=true"
 
@@ -15,6 +16,10 @@ PREVIOUS_GAME_SELECTOR = 'span:contains("Previous")'
 # Colors
 BLADES_OF_FURY_PINK = "#D54386"
 BLADES_OF_FURY_TEAL = "#028680"
+
+def get_image_url_for_team(team_name):
+  team_key = team_name.strip().lower().replace(" ", "_")
+  return "{}{}{}".format(IMAGE_BASE_URL, team_key, ".png?raw=true")
 
 def extract_date_and_time_from_table(table):
   table_rows = table.find('tr')
@@ -58,8 +63,12 @@ def main(config):
   
   date_time = extract_date_and_time_from_table(table)
 
-  bof_logo = http.get(BOF_IMAGE_URL).body()
-  bb_logo = http.get(BADGER_BATTALION_IMAGE_URL).body()
+  bof_team_image_url = get_image_url_for_team("Blades of Fury")
+  opposing_team_image_url = get_image_url_for_team(opposing_team_name)
+  print(bof_team_image_url)
+  print(opposing_team_image_url)
+  bof_logo = http.get(bof_team_image_url).body()
+  bb_logo = http.get(opposing_team_image_url).body()
   
   header = render.Column(
     children=[

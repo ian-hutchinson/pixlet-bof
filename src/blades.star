@@ -1,6 +1,8 @@
 load("render.star", "render")
 load("http.star", "http")
 load("html.star", "html")
+load("cache.star", "cache")
+load("encoding/json.star", "json")
 
 BLADES_STATS_URL = "http://stats.nchl.com/site/3333/page.asp?Site=9818&page=Teams&LeagueID=9818&SeasonID=40&DivisionID=2221&TeamID=6016&Section=Stats&PSORT=PTS&GSORT=GAA"
 SELECTOR = 'div:contains("Skaters")'
@@ -112,8 +114,6 @@ def render_stat_view(title, player_stats, stat):
           sorted_indices.insert(j, i)
           break
 
-  # print(sorted_indices)
-
   return render.Column(
     children=[
       render.Box(
@@ -132,8 +132,13 @@ def render_stat_view(title, player_stats, stat):
   )
 
 def main(config):
-  table = find_skater_table()
-  player_stats = extract_stats_from_table(table)
+  cached_player_stats = cache.get("player_stats")
+  if cached_player_stats == None:
+    table = find_skater_table()
+    player_stats = extract_stats_from_table(table)
+    cache.set("player_stats", str(player_stats), ttl_seconds=10800)
+  else:
+    player_stats = json.decode(cached_player_stats)
 
   return render.Root(
         delay = 2000,
